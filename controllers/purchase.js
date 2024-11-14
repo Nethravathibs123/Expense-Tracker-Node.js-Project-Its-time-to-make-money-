@@ -12,7 +12,7 @@ const purchasePremium = async (req, res) => {
 
     const amount = 2500; // Amount in paise (INR)
 
-    // Create Razorpay order
+    // Create a Razorpay order
     const order = await new Promise((resolve, reject) => {
       rzp.orders.create({ amount, currency: 'INR' }, (err, order) => {
         if (err) {
@@ -29,7 +29,7 @@ const purchasePremium = async (req, res) => {
     return res.status(201).json({ order, key_id: rzp.key_id });
   } catch (err) {
     console.error('Error creating Razorpay order:', err);
-    res.status(403).json({ message: 'Something went wrong', error: err });
+    res.status(403).json({ message: 'Something went wrong while creating the order', error: err.message });
   }
 };
 
@@ -63,51 +63,14 @@ const updateTransactionStatus = async (req, res) => {
 
     // Send appropriate response
     if (isSuccess) {
-      return res.status(200).json({ message: 'Payment successful' });
+      return res.status(200).json({ message: 'Payment successful', premium: true });
     } else {
-      return res.status(200).json({ message: 'Payment failed' });
+      return res.status(200).json({ message: 'Payment failed', premium: false });
     }
   } catch (err) {
     console.error('Error updating transaction status:', err);
-    res.status(500).json({ message: 'An error occurred while updating transaction status', error: err });
+    res.status(500).json({ message: 'An error occurred while updating transaction status', error: err.message });
   }
 };
 
-// Controller for explicitly updating the user's membership to premium
-module.exports.updateMembership = async (req, res) => {
-  const { userId, orderId, msg, paymentId } = req.body;
-  
-  try {
-    // Find the user and check for the user’s existence
-    const user = await User.findByPk(userId);
-    
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    
-    // Only update if the payment was successful
-    if (msg === 'successful') {
-      // Mark the user as premium
-      user.ispremium = true;
-      await user.save();
-      
-      // Optionally, update the order status as well (to reflect the successful payment)
-      const order = await Order.findOne({ where: { orderid: orderId } });
-      if (order) {
-        order.status = 'PAID';
-        await order.save();
-      }
-      
-      // Return success response
-      return res.status(200).json({ message: 'Membership upgraded to premium!', user });
-    } else {
-      // Handle failure case if needed
-      return res.status(400).json({ message: 'Payment failed, membership not upgraded' });
-    }
-  } catch (error) {
-    console.error('Error upgrading membership:', error);
-    return res.status(500).json({ message: 'Error upgrading membership', error });
-  }
-};
-
-module.exports = { purchasePremium, updateTransactionStatus, updateMembership };
+module.exports = { purchasePremium, updateTransactionStatus };

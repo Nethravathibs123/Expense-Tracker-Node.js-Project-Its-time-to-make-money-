@@ -10,11 +10,12 @@ const sequelize = require ('./util/database');
 
 const Users = require ('./models/user');
 const Expense = require('./models/expense');
+const Order=require('./models/order')
 
 app.use(express.static(path.join(__dirname, 'public')));
 const userRoutes = require('./routes/user');
 const expenseRoutes = require('./routes/expense'); 
-const premiumRoutes = require('./routes/premium');
+const premiumRoutes = require('./routes/purchase');
 
 
 
@@ -27,6 +28,10 @@ app.use('/premium', premiumRoutes);
 
 Users.hasMany(Expense, { foreignKey: 'userId' });
 Expense.belongsTo(Users, { foreignKey: 'userId' });
+
+
+Users.hasMany(Order,{foreignKey:'userId'});
+Order.belongsTo(Users,{foreignKey:"userId"})
 
 const port = 3000;
 sequelize

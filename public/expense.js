@@ -116,81 +116,62 @@ expenseList.addEventListener('click', async (event) => {
 });
 
 
-purchasePremiumButton.addEventListener('click', handlePurchase);  // Attach the purchase event to the button
+purchasePremiumButton.addEventListener('click', handlePurchase);
 
 async function handlePurchase(e) {
-    e.preventDefault();
+  e.preventDefault();
 
-    const token = localStorage.getItem('jwt');
-    if (!token) {
-        alert('You need to be logged in to make a purchase');
-        return;
-    }
+  const token = localStorage.getItem('token'); // Make sure the key matches the backend token key
+  if (!token) {
+    alert('You need to be logged in to make a purchase');
+    return;
+  }
+
+  try {
+    const response = await axios.get('http://localhost:3000/premium/premiummembership', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     
-    try {
-        // Step 1: Initiate purchase - request to create a new premium membership order
-        const response = await axios.get('http://localhost:3000/premium/premiummembership', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        
-        const orderId = response.data.order.id;
-        const key_id = response.data.key_id;
+    const orderid = response.data.order.id;
+    const key_id = response.data.key_id;
 
-        // Step 2: Configure the Razorpay options with necessary information
-        const options = {
-            "key": key_id,
-            "order_id": orderId,
-            "handler": async function(paymentResponse) {
-                // Step 3: Handle payment success
-                const payment = {
-                    msg: "successful",
-                    paymentId: paymentResponse.razorpay_payment_id,
-                    orderId: paymentResponse.razorpay_order_id
-                };
-
-                try {
-                    // Verify payment with the backend
-                    await axios.post('http://localhost:3000/premium/transactionstatus', payment, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-                    alert("Payment successful! You are now a premium member.");
-                    window.location.reload();
-                } catch (error) {
-                    console.error('Error verifying payment:', error);
-                    alert("Payment verification failed, please contact support.");
-                }
-            },
-            "modal": {
-                "ondismiss": function() {
-                    alert("Payment was cancelled. Please try again.");
-                }
-            }
+    const options = {
+      key: key_id,
+      order_id: orderid,
+      handler: function(response) {
+        const payment = {
+          msg: 'successful',
+          paymentId: response.razorpay_payment_id,
+          orderId: response.razorpay_order_id,
         };
 
-        // Step 4: Initialize Razorpay with the configured options and open payment modal
-        const rzp1 = new Razorpay(options);
-        rzp1.open();
-    } catch (error) {
-        console.error('Error initiating purchase:', error);
-        alert('Error starting the premium purchase process. Please try again later.');
-    }
+        axios.post('http://localhost:3000/premium/premiummembership', payment, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then(res => {
+          alert('Payment successful! You are now a premium user.');
+          window.location.reload();
+        })
+        .catch(err => {
+          console.error('Error verifying payment:', err);
+          alert('Payment verification failed, please contact support.');
+        });
+      },
+      modal: {
+        ondismiss: function() {
+          alert('Payment was cancelled. Please try again.');
+        }
+      }
+    };
+
+    const rzp1 = new Razorpay(options);
+    rzp1.open();
+  } catch (error) {
+    console.error('Error initiating purchase:', error);
+  }
 }
 
-function updatePremiumStatusUI(isPremium) {
-    const premiumStatusText = document.getElementById('premium-status-text');
-    if (isPremium) {
-        premiumStatusText.textContent = "You are a Premium Member!";
-        premiumStatusText.style.color = 'green';
-    } else {
-        premiumStatusText.textContent = "You are not a Premium Member.";
-        premiumStatusText.style.color = 'red';
-    }
-}
 
-// Call the updatePremiumStatusUI function on page load if the user is already premium
-window.onload = function() {
-    const isPremium = localStorage.getItem('ispremium') === 'true';
-    updatePremiumStatusUI(isPremium);
-};
+
 
 fetchExpenses();

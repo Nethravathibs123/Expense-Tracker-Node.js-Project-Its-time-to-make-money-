@@ -10,6 +10,4 @@ router.get('/premiummembership', userauthenticate, purchaseController.purchasePr
 
 router.post('/updatetransactionstatus',userauthenticate, purchaseController.updateTransactionStatus);
 
-router.post('/updateMembership', userauthenticate, purchaseController.updateMembership);
-
 module.exports = router;
