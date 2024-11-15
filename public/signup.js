@@ -40,7 +40,7 @@ signUpForm.addEventListener('submit', async(event) => {
             errorMsg.textContent = `Error: ${error.response.data.message}`;
         } else {
             console.log('Error adding user:', error);
-            errorMsg.textContent = 'An unexpected error occurred.';
+            
         }
     }
     

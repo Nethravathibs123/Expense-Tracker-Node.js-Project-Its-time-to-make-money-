@@ -10,9 +10,8 @@ const purchasePremium = async (req, res) => {
       key_secret: process.env.RAZORPAY_KEY_SECRET,
     });
 
-    const amount = 2500; // Amount in paise (INR)
+    const amount = 1000; 
 
-    // Create a Razorpay order
     const order = await new Promise((resolve, reject) => {
       rzp.orders.create({ amount, currency: 'INR' }, (err, order) => {
         if (err) {
@@ -22,10 +21,9 @@ const purchasePremium = async (req, res) => {
       });
     });
 
-    // Create an order entry for the user in the database
-    await req.user.createOrder({ orderid: order.id, status: 'PENDING' });
-
-    // Respond with order details and Razorpay key
+    console.log('Razorpay Order:', order); // Check if order.id exists
+    await req.user.createOrder({ orderId: order.id, status: 'PENDING' });
+    
     return res.status(201).json({ order, key_id: rzp.key_id });
   } catch (err) {
     console.error('Error creating Razorpay order:', err);

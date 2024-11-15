@@ -35,7 +35,7 @@ Order.belongsTo(Users,{foreignKey:"userId"})
 
 const port = 3000;
 sequelize
-.sync({force:true})
+.sync()
 .then((result) => {
     console.log(`server is working on http://localhost:${port}`);
    app.listen(port);

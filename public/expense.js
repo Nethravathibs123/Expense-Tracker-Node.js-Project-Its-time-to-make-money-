@@ -37,7 +37,7 @@ async function fetchExpenses() {
     try {
         const token = localStorage.getItem('token');
         const response = await axios.get('http://localhost:3000/expenses', {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization:  token }
         });
         expenses = response.data;
         renderExpenses();
@@ -58,7 +58,7 @@ addExpenseButton.addEventListener('click', async () => {
         if (editingIndex === -1) {  // Add new expense
             try {
                 const response = await axios.post('http://localhost:3000/expenses', newExpense, {
-                    headers: { Authorization: `Bearer ${token}` }
+                    headers: { Authorization: token }
                 });
                 expenses.push(response.data);
                 fetchExpenses();
@@ -69,7 +69,7 @@ addExpenseButton.addEventListener('click', async () => {
             try {
                 const id = expenses[editingIndex].id;
                 await axios.put(`http://localhost:3000/expenses/${id}`, newExpense, {
-                    headers: { Authorization: `Bearer ${token}` }
+                    headers: { Authorization: token}
                 });
                 expenses[editingIndex] = newExpense;
                 editingIndex = -1;  // Reset editing index
@@ -94,7 +94,7 @@ expenseList.addEventListener('click', async (event) => {
         const id = event.target.getAttribute('data-id');
         try {
             await axios.delete(`http://localhost:3000/expenses/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: token }
             });
             expenses = expenses.filter(expense => expense.id !== parseInt(id));
             renderExpenses();
@@ -129,7 +129,7 @@ async function handlePurchase(e) {
 
   try {
     const response = await axios.get('http://localhost:3000/premium/premiummembership', {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization:  token },
     });
     
     const orderid = response.data.order.id;
@@ -145,8 +145,8 @@ async function handlePurchase(e) {
           orderId: response.razorpay_order_id,
         };
 
-        axios.post('http://localhost:3000/premium/premiummembership', payment, {
-          headers: { Authorization: `Bearer ${token}` },
+        axios.post('http://localhost:000/premium/premiummembership', payment, {
+          headers: { Authorization:  token  },
         })
         .then(res => {
           alert('Payment successful! You are now a premium user.');
