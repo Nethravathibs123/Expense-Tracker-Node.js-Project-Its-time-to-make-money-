@@ -121,7 +121,7 @@ purchasePremiumButton.addEventListener('click', handlePurchase);
 async function handlePurchase(e) {
   e.preventDefault();
 
-  const token = localStorage.getItem('token'); // Make sure the key matches the backend token key
+  const token = localStorage.getItem('token'); 
   if (!token) {
     alert('You need to be logged in to make a purchase');
     return;
@@ -145,7 +145,7 @@ async function handlePurchase(e) {
           orderId: response.razorpay_order_id,
         };
 
-        axios.post('http://localhost:000/premium/premiummembership', payment, {
+        axios.post('http://localhost:3000/premium/updatetransactionstatus', payment, {
           headers: { Authorization:  token  },
         })
         .then(res => {
